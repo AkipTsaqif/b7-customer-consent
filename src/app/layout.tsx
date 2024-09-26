@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Link from "next/link";
-import Consent from "@/components/consent";
 import ScrollManager from "@/components/scroll";
 
 const geistSans = localFont({

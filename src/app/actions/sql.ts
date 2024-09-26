@@ -20,11 +20,10 @@ export const saveConsent = async (data: FormData) => {
 			message: "Consent saved successfully",
 			data: result,
 		};
-	} catch (error: any) {
+	} catch {
 		return {
 			status: 500,
 			message: "Internal server error",
-			data: error,
 		};
 	}
 };

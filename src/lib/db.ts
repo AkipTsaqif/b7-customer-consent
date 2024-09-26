@@ -1,6 +1,5 @@
 import sql from "mssql";
 
-// connection configs
 const config = {
 	user: "sab7",
 	password: "sqlb7",
@@ -12,12 +11,12 @@ const config = {
 	},
 };
 
-export default async function ExecuteQuery(query: string, options?: any) {
+export default async function ExecuteQuery(query: string) {
 	try {
-		let pool = await sql.connect(config);
-		let products = await pool.request().query(query);
+		const pool = await sql.connect(config);
+		const products = await pool.request().query(query);
 		return products.recordsets;
-	} catch (error) {
-		console.log(error);
+	} catch {
+		console.log("ERROR");
 	}
 }

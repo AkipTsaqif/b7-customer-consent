@@ -1,20 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, useFormState } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Button } from "./ui/button";
 import { saveConsent } from "@/app/actions/sql";
 
@@ -48,6 +41,7 @@ const Consent = ({ isDisabled, setFormSubmitSuccess }: ConsentProps) => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+		setIsLoading(true);
 		const formData = new FormData();
 		formData.append("email", data.email);
 		formData.append("agreeTerms", data.agreeTerms.toString());
@@ -56,6 +50,7 @@ const Consent = ({ isDisabled, setFormSubmitSuccess }: ConsentProps) => {
 		const result = await saveConsent(formData);
 		if (result.status === 201) {
 			form.reset();
+			setIsLoading(false);
 			setFormSubmitSuccess(true);
 		}
 	};
