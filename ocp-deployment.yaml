@@ -1,0 +1,72 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: "{APP_NAME}-{ENV}"
+    labels:
+        appname: "{APP_NAME}-{ENV}"
+    annotations:
+        openshift.io/scc: restricted
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: "{APP_NAME}-{ENV}"
+    template:
+        metadata:
+            labels:
+                app: "{APP_NAME}-{ENV}"
+        spec:
+            restartPolicy: Always
+            serviceAccountName: deployer
+            schedulerName: default-scheduler
+            terminationGracePeriodSeconds: 30
+            securityContext: {}
+            containers:
+                - resources: {}
+                  terminationMessagePath: /dev/termination-log
+                  name: "{APP_NAME}-{ENV}"
+                  ports:
+                      - containerPort: 3000
+                        protocol: TCP
+                  imagePullPolicy: IfNotPresent
+                  terminationMessagePolicy: File
+                  image: "{ARTIFACTORY_REPO}/{SERVICE_NAME}/{IMG_NAME}:{IMG_TAG}-{ENV}"
+                  envFrom:
+                      - secretRef:
+                            name: db-credentials
+            serviceAccount: deployer
+            dnsPolicy: ClusterFirst
+            imagePullSecrets:
+                - name: "{APP_NAME}-secret"
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: 25%
+            maxSurge: 25%
+---
+kind: Service
+apiVersion: v1
+metadata:
+    name: "{APP_NAME}-{ENV}"
+spec:
+    ports:
+        - protocol: TCP
+          port: 3000
+    selector:
+        app: "{APP_NAME}-{ENV}"
+    type: ClusterIP
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+    name: "{APP_NAME}-{ENV}"
+    annotations:
+        openshift.io/host.generated: "true"
+spec:
+    to:
+        kind: Service
+        name: "{APP_NAME}-{ENV}"
+        weight: 100
+    port:
+        targetPort: "3000"
+    wildcardPolicy: None

@@ -1,0 +1,163 @@
+before_script:
+    - export APP_VERSION=$(cat version.txt)
+    - echo "Versi saat ini:"
+    - echo $APP_VERSION
+
+stages:
+    - config
+    - check
+    - build
+    - deploy
+    - bump-ver
+
+config-ci-dev:
+    stage: config
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: ($CI_COMMIT_BRANCH != "master" && $CI_COMMIT_REF_NAME != "master")
+    script:
+        - sed -i -e "s,{ENV},dev,g" ocp-deployment.yaml
+        - sed -i -e "s/{ENVIRONMENT_NAME}/development/g" ocp-deployment.yaml
+    artifacts:
+        paths:
+            - ocp-deployment.yaml
+
+config-ci-prod:
+    stage: config
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: manual
+    script:
+        - sed -i '63 s/-{ENV}//' ocp-deployment.yaml
+        - sed -i -e "s,{ENV},prod,g" ocp-deployment.yaml
+        - sed -i -e "s/{ENVIRONMENT_NAME}/production/g" ocp-deployment.yaml
+    artifacts:
+        paths:
+            - ocp-deployment.yaml
+
+.code-check-v2:
+    stage: check
+    tags:
+        - b7-aio-runner-1
+    image: mcr.microsoft.com/dotnet/sdk:6.0
+    variables:
+        SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+        GIT_DEPTH: "0"
+    cache:
+        key: "${CI_JOB_NAME}"
+        paths:
+            - .sonar/cache
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    script:
+        - apt-get update
+        - apt-get install --yes openjdk-17-jre
+        - dotnet tool install --global dotnet-sonarscanner
+        - dotnet tool install --global dotnet-coverage
+        - export PATH="$PATH:/root/.dotnet/tools"
+        - dotnet sonarscanner begin /k:"b7-cam-master-role" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="$SONAR_HOST_URL" /d:sonar.coverage.exclusions=**/*.cs /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.qualitygate.wait=true
+        - dotnet build --no-incremental
+        - dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
+        - dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+build-image-dev:
+    stage: build
+    image: docker
+    services:
+        - docker:dind
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: ($CI_COMMIT_BRANCH != "master" && $CI_COMMIT_REF_NAME != "master")
+    before_script:
+        - export APP_VERSION=$(cat version.txt)
+        - echo $CI_PROJECT_NAME
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - echo $APP_VERSION
+        - docker build --build-arg NODE_ENV=development -t $CI_PROJECT_NAME:$APP_VERSION .
+        - docker tag $CI_PROJECT_NAME:$APP_VERSION $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$APP_VERSION-dev
+        - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$APP_VERSION-dev
+
+build-image-prod:
+    stage: build
+    image: docker
+    services:
+        - docker:dind
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+    before_script:
+        - export APP_VERSION=$(cat version.txt)
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - echo $APP_VERSION
+        - docker build --build-arg NODE_ENV=production -t $CI_PROJECT_NAME:$APP_VERSION .
+        - docker tag $CI_PROJECT_NAME:$APP_VERSION $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$APP_VERSION-prod
+        - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$APP_VERSION-prod
+
+deploy-image-dev:
+    stage: deploy
+    image: openshift/origin-cli
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: ($CI_COMMIT_BRANCH != "master" && $CI_COMMIT_REF_NAME != "master")
+    before_script:
+        - export APP_VERSION=$(cat version.txt)
+    script:
+        - oc login $OPENSHIFT_URL -u $OPENSHIFT_LOGIN -p $OPENSHIFT_PWD --insecure-skip-tls-verify=true
+        - oc new-project $NAMESPACE || oc project $NAMESPACE
+        - oc delete secret db-credentials --ignore-not-found
+        - oc create secret generic db-credentials --from-literal=DATABASE_URL="sqlserver://10.100.19.52;database=ClaimOnline;user=eclaimuser;password=Welcome123;trustServerCertificate=true;encrypt=true" --from-literal=ITSUPDB_URL="sqlserver://10.100.19.52;database=IT_Support;user=sab7;password=sqlb7;trustServerCertificate=true;encrypt=true"
+        - oc delete secret $CI_PROJECT_NAME-secret --ignore-not-found
+        - oc create secret docker-registry $CI_PROJECT_NAME-secret --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$REGISTRY_TOKEN
+        - cat ocp-deployment.yaml | sed "s,{SERVICE_NAME},${CI_PROJECT_NAMESPACE},g" | sed "s/{APP_NAME}/${CI_PROJECT_NAME}/g" | sed "s/{ARTIFACTORY_REPO}/${CI_REGISTRY}/g"  | sed "s/{IMG_NAME}/${CI_PROJECT_NAME}/g"| sed "s/{IMG_TAG}/${APP_VERSION}/g" | oc apply -n "$NAMESPACE" -f -
+        - oc rollout status deployment/$CI_PROJECT_NAME-dev -n $NAMESPACE
+        - echo $CONSOLE_OPENSHIFT_URL$NAMESPACE/deployments/$CI_PROJECT_NAME-dev
+        - oc get route $CI_PROJECT_NAME-dev -o custom-columns=ROUTE:.spec.host --no-headers -n $NAMESPACE
+
+deploy-image-prod:
+    stage: deploy
+    image: openshift/origin-cli
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+    before_script:
+        - export APP_VERSION=$(cat version.txt)
+    script:
+        - oc login $OPENSHIFT_URL -u $OPENSHIFT_LOGIN -p $OPENSHIFT_PWD --insecure-skip-tls-verify=true
+        - oc new-project $NAMESPACE || oc project $NAMESPACE
+        - oc delete secret $CI_PROJECT_NAME-secret --ignore-not-found
+        - oc create secret docker-registry $CI_PROJECT_NAME-secret --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD
+        - cat ocp-deployment.yaml | sed "s,{SERVICE_NAME},${CI_PROJECT_NAMESPACE},g" | sed "s/{APP_NAME}/${CI_PROJECT_NAME}/g" | sed "s/{ARTIFACTORY_REPO}/${CI_REGISTRY}/g"  | sed "s/{IMG_NAME}/${CI_PROJECT_NAME}/g"| sed "s/{IMG_TAG}/${APP_VERSION}/g" | oc apply -n "$NAMESPACE" -f -
+        - oc rollout status deployment/$CI_PROJECT_NAME-prod -n $NAMESPACE
+        - echo $CONSOLE_OPENSHIFT_URL$NAMESPACE/deployments/$CI_PROJECT_NAME-prod
+        - oc get route $CI_PROJECT_NAME -o custom-columns=ROUTE:.spec.host --no-headers -n $NAMESPACE
+
+bump-version:
+    stage: bump-ver
+    image: python:3.9
+    tags:
+        - b7-aio-runner-1
+    rules:
+        - if: "$CI_COMMIT_BRANCH"
+    before_script:
+        - git config user.email "bump@version.com"
+        - git config user.name "Version Bumper"
+        - git remote set-url origin $REMOTE_URL
+    script:
+        - git fetch origin $CI_DEFAULT_BRANCH
+        - git reset --hard
+        - git checkout $CI_COMMIT_BRANCH || git checkout -b $CI_COMMIT_BRANCH
+        - git restore .
+        - git rebase origin/$CI_COMMIT_BRANCH
+        - NEW_VER=$(python bump-ver.py $CI_COMMIT_REF_NAME)
+        - git add version.txt
+        - git commit -m "Up versi ke $NEW_VER [skip ci]"
+        - git push -u origin $CI_COMMIT_BRANCH
