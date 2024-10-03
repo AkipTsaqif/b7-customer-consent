@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { updateConsent } from "../actions/sql";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -44,4 +44,12 @@ const ObjectionPage = () => {
 	);
 };
 
-export default ObjectionPage;
+const ObjectPageSuspense = () => {
+	return (
+		<Suspense>
+			<ObjectionPage />
+		</Suspense>
+	);
+};
+
+export default ObjectPageSuspense;
