@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Consent from "./consent";
 import ThankYou from "./thank-you";
+import { usePathname } from "next/navigation";
 
 interface ScrollManagerProps {
 	children: React.ReactNode;
@@ -12,6 +13,7 @@ export default function ScrollManager({ children }: ScrollManagerProps) {
 	const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 	const [isFormSubmitSuccess, setFormSubmitSuccess] = useState(false);
 
+	const path = usePathname();
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -64,7 +66,7 @@ export default function ScrollManager({ children }: ScrollManagerProps) {
 			>
 				{isFormSubmitSuccess ? <ThankYou /> : children}
 			</div>
-			{!isFormSubmitSuccess && (
+			{!isFormSubmitSuccess && path === "/" && (
 				<footer className="fixed inset-x-0 bottom-0 w-full flex items-center justify-center border-t border-t-foreground/10 px-4 pb-4 bg-white">
 					<Consent
 						isDisabled={!isScrolledToBottom}

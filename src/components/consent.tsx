@@ -9,7 +9,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Button } from "./ui/button";
-import { saveConsent } from "@/app/actions/sql";
+import { saveConsent, sendEmail } from "@/app/actions/sql";
 
 interface ConsentProps {
 	isDisabled: boolean;
@@ -48,6 +48,7 @@ const Consent = ({ isDisabled, setFormSubmitSuccess }: ConsentProps) => {
 		formData.append("agreeData", data.agreeData.toString());
 
 		const result = await saveConsent(formData);
+		await sendEmail(formData);
 		if (result.status === 201) {
 			form.reset();
 			setIsLoading(false);
