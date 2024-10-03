@@ -16,7 +16,11 @@ export default async function ExecuteQuery(query: string) {
 		const pool = await sql.connect(config);
 		const products = await pool.request().query(query);
 		return products.recordsets;
-	} catch (error: any) {
-		console.log("ERROR: ", error);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log("ERROR: ", error.message);
+		} else {
+			console.log("Unexpected error: ", error);
+		}
 	}
 }
