@@ -8,10 +8,12 @@ import { usePathname } from "next/navigation";
 interface ScrollManagerProps {
 	children: React.ReactNode;
 	cookieData: Record<string, unknown> | null;
+	referer: string | null;
 }
 
 const ScrollManager: React.FC<ScrollManagerProps> = ({
 	cookieData,
+	referer,
 	children,
 }: ScrollManagerProps) => {
 	const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
@@ -99,6 +101,7 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 					<Consent
 						isDisabled={!isScrolledToBottom}
 						cookieData={cookieData}
+						referer={referer}
 						setFormSubmitSuccess={setFormSubmitSuccess}
 					/>
 				</div>

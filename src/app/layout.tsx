@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import ScrollManager from "@/components/scroll";
 import { CookiesProvider } from "next-client-cookies/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { AnyUserData } from "@/types/userdata";
 
 const geistSans = localFont({
@@ -39,6 +39,9 @@ export default function RootLayout({
 			console.error("Error parsing cookie data:", error);
 		}
 	}
+
+	const referer = headers().get("referer") || null;
+
 	return (
 		<html lang="en">
 			<body
@@ -51,7 +54,10 @@ export default function RootLayout({
 								User Consent
 							</div>
 						</nav>
-						<ScrollManager cookieData={parsedData}>
+						<ScrollManager
+							cookieData={parsedData}
+							referer={referer}
+						>
 							{children}
 						</ScrollManager>
 					</main>

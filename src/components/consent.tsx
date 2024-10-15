@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation";
 interface ConsentProps {
 	isDisabled: boolean;
 	cookieData: Record<string, unknown> | null;
+	referer: string | null;
 	setFormSubmitSuccess: (value: boolean) => void;
 }
 
@@ -36,6 +37,7 @@ const FormSchema = z.object({
 const Consent = ({
 	isDisabled,
 	cookieData,
+	referer,
 	setFormSubmitSuccess,
 }: ConsentProps) => {
 	const form = useForm<z.infer<typeof FormSchema>>({
@@ -73,7 +75,10 @@ const Consent = ({
 
 		if (cookieData !== null)
 			formData.append("user_data_json", JSON.stringify(cookieData));
-		formData.append("referer", searchParams.get("referer") || "");
+		formData.append(
+			"referer",
+			searchParams.get("referer") || referer || ""
+		);
 
 		const result = await saveConsent(formData);
 		await sendEmail(formData);
