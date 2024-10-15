@@ -7,9 +7,13 @@ import { usePathname } from "next/navigation";
 
 interface ScrollManagerProps {
 	children: React.ReactNode;
+	cookieData: any;
 }
 
-export default function ScrollManager({ children }: ScrollManagerProps) {
+const ScrollManager: React.FC<ScrollManagerProps> = ({
+	cookieData,
+	children,
+}: ScrollManagerProps) => {
 	const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 	const [isFormSubmitSuccess, setFormSubmitSuccess] = useState(false);
 
@@ -54,6 +58,21 @@ export default function ScrollManager({ children }: ScrollManagerProps) {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (isScrolledToBottom && contentRef.current) {
+			console.log("content ref:", contentRef.current);
+			const element = contentRef.current;
+
+			setTimeout(() => {
+				element.scrollIntoView({
+					behavior: "smooth",
+
+					block: "end",
+				});
+			}, 400);
+		}
+	}, [isScrolledToBottom]);
+
 	return (
 		<>
 			<div
@@ -61,19 +80,31 @@ export default function ScrollManager({ children }: ScrollManagerProps) {
 				className={`flex flex-col gap-20 max-w-5xl p-5 ${
 					isFormSubmitSuccess
 						? "overflow-hidden h-[calc(95vh-8rem)]"
-						: "overflow-y-auto pb-[16rem] h-auto"
+						: "overflow-y-auto h-auto transition-all duration-500"
 				}`}
+				style={{
+					paddingBottom: isScrolledToBottom ? "28rem" : "2rem",
+				}}
 			>
 				{isFormSubmitSuccess ? <ThankYou /> : children}
 			</div>
 			{!isFormSubmitSuccess && path === "/" && (
-				<footer className="fixed inset-x-0 bottom-0 w-full flex items-center justify-center border-t border-t-foreground/10 px-4 pb-4 bg-white">
+				<div
+					className={`fixed inset-x-0 bottom-0 w-full flex flex-col items-center border-t border-t-foreground/10 bg-white transition-transform duration-500 ${
+						isScrolledToBottom
+							? "translate-y-0"
+							: "translate-y-full"
+					}`}
+				>
 					<Consent
 						isDisabled={!isScrolledToBottom}
+						cookieData={cookieData}
 						setFormSubmitSuccess={setFormSubmitSuccess}
 					/>
-				</footer>
+				</div>
 			)}
 		</>
 	);
-}
+};
+
+export default ScrollManager;
