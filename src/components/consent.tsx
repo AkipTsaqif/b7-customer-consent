@@ -14,7 +14,7 @@ import { useSearchParams } from "next/navigation";
 
 interface ConsentProps {
 	isDisabled: boolean;
-	cookieData: any;
+	cookieData: Record<string, unknown> | null;
 	setFormSubmitSuccess: (value: boolean) => void;
 }
 
@@ -71,7 +71,7 @@ const Consent = ({
 		formData.append("other_info", data.other_info);
 		formData.append("agreeTerms", data.agreeTerms.toString());
 
-		cookieData !== null &&
+		if (cookieData !== null)
 			formData.append("user_data_json", JSON.stringify(cookieData));
 		formData.append("referer", searchParams.get("referer") || "");
 

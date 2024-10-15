@@ -19,8 +19,8 @@ export default function Home() {
 						berkomitmen untuk melindungi kepentingan dan kenyamanan
 						Pelanggan termasuk pada lingkup Undang-Undang Nomor 27
 						Tahun 2022 tentang Pelindungan Data Pribadi (selanjutnya
-						disebut sebagai "
-						<span className="font-bold">UU PDP</span>") dan
+						disebut sebagai &quot;
+						<span className="font-bold">UU PDP</span>&quot;) dan
 						peraturan perundang-undangan lainnya yang terkait dengan
 						Pelindungan Data Pribadi yang ada di Indonesia.
 					</p>

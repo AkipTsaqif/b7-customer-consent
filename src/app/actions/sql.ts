@@ -1,7 +1,6 @@
 "use server";
 
 import ExecuteQuery from "@/lib/db";
-import { AnyUserData } from "@/types/userdata";
 
 export const saveConsent = async (data: FormData) => {
 	console.log("FORM DATA: ", data);

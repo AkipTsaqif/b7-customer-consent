@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 interface ScrollManagerProps {
 	children: React.ReactNode;
-	cookieData: any;
+	cookieData: Record<string, unknown> | null;
 }
 
 const ScrollManager: React.FC<ScrollManagerProps> = ({
