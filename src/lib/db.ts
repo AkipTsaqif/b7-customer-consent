@@ -12,8 +12,8 @@ const config = {
 };
 
 type QueryResult = {
-	recordsets?: sql.IRecordSet<any>[];
-	recordset?: sql.IRecordSet<any>;
+	recordsets?: sql.IRecordSet<string>[];
+	recordset?: sql.IRecordSet<string>;
 	rowsAffected?: number[];
 };
 
@@ -25,7 +25,9 @@ export default async function ExecuteQuery(
 		const result = await pool.request().query(query);
 
 		if (Array.isArray(result.recordsets) && result.recordsets.length > 0) {
-			return { recordsets: result.recordsets as sql.IRecordSet<any>[] };
+			return {
+				recordsets: result.recordsets as sql.IRecordSet<string>[],
+			};
 		} else if (result.recordset) {
 			return { recordset: result.recordset };
 		} else {

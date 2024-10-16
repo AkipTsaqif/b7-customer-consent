@@ -36,7 +36,6 @@ const FormSchema = z.object({
 
 const Consent = ({
 	isDisabled,
-	cookieData,
 	referer,
 	setFormSubmitSuccess,
 }: ConsentProps) => {
@@ -60,7 +59,6 @@ const Consent = ({
 	const [uniqueIdentifier, setUniqueIdentifier] = useState<string | null>(
 		null
 	);
-	const [userDataJson, setUserDataJson] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -78,7 +76,6 @@ const Consent = ({
 				`/api/consent?uid=${uniqueIdentifier}`
 			);
 			const data = await response.json();
-			setUserDataJson(data);
 			user_data_json = data;
 		};
 
