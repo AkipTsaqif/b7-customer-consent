@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
+const cspHeader = `
+    default-src 'self' *.kalbe.co.id kalbe.co.id *.bintang7.com;
+    script-src http://b7-cam-dev-cam-micro.apps.alpha.kalbe.co.id *.kalbe.co.id kalbe.co.id *.bintang7.com 'nonce-403rHDzb5M1eDsnb';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data:;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+`;
+
 const nextConfig = {
 	reactStrictMode: false,
 	output: "standalone",
@@ -36,10 +48,10 @@ const nextConfig = {
 						key: "X-Frame-Options",
 						value: "SAMEORIGIN",
 					},
-					// {
-					// 	key: "Content-Security-Policy",
-					// 	value: cspHeader.replace(/\n/g, ""),
-					// },
+					{
+						key: "Content-Security-Policy",
+						value: cspHeader.replace(/\n/g, ""),
+					},
 				],
 			},
 		];

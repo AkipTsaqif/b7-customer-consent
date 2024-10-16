@@ -4,6 +4,7 @@ import "./globals.css";
 import ScrollManager from "@/components/scroll";
 import { CookiesProvider } from "next-client-cookies/server";
 import { cookies, headers } from "next/headers";
+import Script from "next/script";
 import { AnyUserData } from "@/types/userdata";
 
 const geistSans = localFont({
@@ -29,6 +30,7 @@ export default function RootLayout({
 }>) {
 	const cookieStore = cookies();
 	const userData = cookieStore.get("userData")?.value;
+	const nonce = headers().get("x-nonce") ?? undefined;
 
 	let parsedData: AnyUserData | null = null;
 	if (userData) {
@@ -43,6 +45,15 @@ export default function RootLayout({
 
 	return (
 		<html lang="en">
+			<head>
+				<Script
+					id="inline-script"
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: `console.log('This script is protected by a nonce.');`,
+					}}
+				/>
+			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
