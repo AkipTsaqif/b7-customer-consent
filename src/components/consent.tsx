@@ -57,14 +57,33 @@ const Consent = ({
 
 	const { isValid } = useFormState({ control: form.control });
 	const [isLoading, setIsLoading] = useState(false);
-
-	useEffect(
-		() => console.log("search params:", searchParams.get("referer")),
-		[searchParams]
+	const [uniqueIdentifier, setUniqueIdentifier] = useState<string | null>(
+		null
 	);
+	const [userDataJson, setUserDataJson] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const uid = new URLSearchParams(window.location.search).get("uid");
+			setUniqueIdentifier(uid);
+		}
+	}, []);
 
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
 		setIsLoading(true);
+		let user_data_json = "";
+
+		const fetchJsonData = async () => {
+			const response = await fetch(
+				`/api/consent?uid=${uniqueIdentifier}`
+			);
+			const data = await response.json();
+			setUserDataJson(data);
+			user_data_json = data;
+		};
+
+		await fetchJsonData();
+
 		const formData = new FormData();
 		formData.append("name", data.name);
 		formData.append("email", data.email);
@@ -73,8 +92,11 @@ const Consent = ({
 		formData.append("other_info", data.other_info);
 		formData.append("agreeTerms", data.agreeTerms.toString());
 
-		if (cookieData !== null)
-			formData.append("user_data_json", JSON.stringify(cookieData));
+		// if (cookieData !== null)
+		// 	formData.append("user_data_json", JSON.stringify(cookieData));
+		// else
+
+		formData.append("user_data_json", JSON.stringify(user_data_json) || "");
 		formData.append(
 			"referer",
 			searchParams.get("referer") || referer || ""

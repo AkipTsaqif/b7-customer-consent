@@ -13,7 +13,6 @@ const ObjectionPage = () => {
 	const objectConsent = async (email: string) => {
 		try {
 			const result = await updateConsent(email);
-			console.log("RESULT", result);
 		} catch (error) {
 			console.error("ERROR", error);
 		}

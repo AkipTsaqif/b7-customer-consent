@@ -26,7 +26,6 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 		let scrollTimeout: NodeJS.Timeout | null = null;
 
 		const handleScroll = () => {
-			console.log("positions before timeout:");
 			if (contentRef.current) {
 				if (scrollTimeout) {
 					clearTimeout(scrollTimeout);
@@ -40,11 +39,6 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 					setIsScrolledToBottom(
 						scrollTop + clientHeight >= scrollHeight - paddingBottom
 					);
-					console.log("positions after timeout:", {
-						scrollTop,
-						scrollHeight,
-						clientHeight,
-					});
 				}, 500);
 			}
 		};
@@ -62,7 +56,6 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 
 	useEffect(() => {
 		if (isScrolledToBottom && contentRef.current) {
-			console.log("content ref:", contentRef.current);
 			const element = contentRef.current;
 
 			setTimeout(() => {

@@ -11,16 +11,32 @@ const config = {
 	},
 };
 
-export default async function ExecuteQuery(query: string) {
+type QueryResult = {
+	recordsets?: sql.IRecordSet<any>[];
+	recordset?: sql.IRecordSet<any>;
+	rowsAffected?: number[];
+};
+
+export default async function ExecuteQuery(
+	query: string
+): Promise<QueryResult> {
 	try {
 		const pool = await sql.connect(config);
-		const products = await pool.request().query(query);
-		return products.recordsets;
+		const result = await pool.request().query(query);
+
+		if (Array.isArray(result.recordsets) && result.recordsets.length > 0) {
+			return { recordsets: result.recordsets as sql.IRecordSet<any>[] };
+		} else if (result.recordset) {
+			return { recordset: result.recordset };
+		} else {
+			return { rowsAffected: result.rowsAffected };
+		}
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			console.log("ERROR: ", error.message);
 		} else {
 			console.log("Unexpected error: ", error);
 		}
+		return {};
 	}
 }

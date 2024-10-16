@@ -3,8 +3,7 @@
 import ExecuteQuery from "@/lib/db";
 
 export const saveConsent = async (data: FormData) => {
-	console.log("FORM DATA: ", data);
-
+	console.log("FORM DATA", data);
 	const name = data.get("name");
 	const email = data.get("email");
 	const phone = data.get("phone") || null;

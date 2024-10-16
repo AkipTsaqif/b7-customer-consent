@@ -34,7 +34,6 @@ export default function RootLayout({
 	if (userData) {
 		try {
 			parsedData = JSON.parse(decodeURIComponent(userData));
-			console.log("Parsed cookie data:", parsedData);
 		} catch (error) {
 			console.error("Error parsing cookie data:", error);
 		}
