@@ -24,6 +24,7 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 
 	useEffect(() => {
 		let scrollTimeout: NodeJS.Timeout | null = null;
+		console.log("Selamat datang di web customer consent Bintang Toedjoe");
 
 		const handleScroll = () => {
 			if (contentRef.current) {
@@ -39,12 +40,13 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 					setIsScrolledToBottom(
 						scrollTop + clientHeight >= scrollHeight - paddingBottom
 					);
-				}, 500);
+				}, 3000);
 			}
 		};
 
 		const contentElement = contentRef.current;
 		contentElement?.addEventListener("wheel", handleScroll);
+		console.log("Silahkan isi form persetujuan pelanggan");
 
 		return () => {
 			contentElement?.removeEventListener("wheel", handleScroll);
@@ -52,7 +54,7 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 				clearTimeout(scrollTimeout);
 			}
 		};
-	}, []);
+	}, [contentRef]);
 
 	useEffect(() => {
 		if (isScrolledToBottom && contentRef.current) {
