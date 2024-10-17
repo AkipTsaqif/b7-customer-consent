@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ThankYou from "./thank-you";
 import { usePathname } from "next/navigation";
 import WholePage from "./whole-page";
