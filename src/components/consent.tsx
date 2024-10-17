@@ -14,9 +14,8 @@ import { useSearchParams } from "next/navigation";
 
 interface ConsentProps {
 	isDisabled: boolean;
-	cookieData: Record<string, unknown> | null;
 	referer: string | null;
-	setFormSubmitSuccess: (value: boolean) => void;
+	setFormSubmitSuccess: (value: boolean) => void | undefined;
 }
 
 const FormSchema = z.object({
@@ -109,7 +108,7 @@ const Consent = ({
 	};
 
 	return (
-		<div className="w-[30rem] md:w-[40rem] lg:w-[50rem] grid py-2">
+		<div className="grid py-2">
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<FormField
@@ -117,7 +116,7 @@ const Consent = ({
 						name="name"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 font-bold text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 font-bold text-sm md:text-md">
 									Nama:<span className="text-red-600">*</span>
 								</FormLabel>
 								<FormControl>
@@ -136,7 +135,7 @@ const Consent = ({
 						name="email"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 font-bold text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 font-bold text-sm md:text-md">
 									Email:
 									<span className="text-red-600">*</span>
 								</FormLabel>
@@ -157,7 +156,7 @@ const Consent = ({
 						name="phone"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 text-sm md:text-md">
 									Nomor HP:
 								</FormLabel>
 								<FormControl>
@@ -175,7 +174,7 @@ const Consent = ({
 						name="address"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 text-sm md:text-md">
 									Alamat:
 								</FormLabel>
 								<FormControl>
@@ -193,7 +192,7 @@ const Consent = ({
 						name="other_info"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 text-sm md:text-md">
 									Info tambahan:
 								</FormLabel>
 								<FormControl>
@@ -223,7 +222,7 @@ const Consent = ({
 									</FormControl>
 									<Label
 										htmlFor="terms"
-										className="text-md leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+										className="text-sm md:text-md leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 									>
 										Dengan mengisi tanda centang pada box
 										ini, saya mengakui bahwa saya telah

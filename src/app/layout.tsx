@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ScrollManager from "@/components/scroll";
-import { CookiesProvider } from "next-client-cookies/server";
-import { cookies, headers } from "next/headers";
-import Script from "next/script";
-import { AnyUserData } from "@/types/userdata";
+import { headers } from "next/headers";
+import React from "react";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -23,55 +21,28 @@ export const metadata: Metadata = {
 	description: "Formulir persetujuan pelanggan PT Bintang Toedjoe",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const cookieStore = cookies();
-	const userData = cookieStore.get("userData")?.value;
-	const nonce = headers().get("x-nonce") ?? undefined;
-
-	let parsedData: AnyUserData | null = null;
-	if (userData) {
-		try {
-			parsedData = JSON.parse(decodeURIComponent(userData));
-		} catch (error) {
-			console.error("Error parsing cookie data:", error);
-		}
-	}
-
 	const referer = headers().get("referer") || null;
 
 	return (
 		<html lang="en">
-			<head>
-				<Script
-					id="inline-script"
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `console.log('This script is protected by a nonce.');`,
-					}}
-				/>
-			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<CookiesProvider>
-					<main className="flex flex-col items-center relative">
-						<nav className="sticky top-0 w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white">
-							<div className="w-full max-w-5xl flex justify-center items-center p-3 px-5 text-xl font-semibold">
-								User Consent
-							</div>
-						</nav>
-						<ScrollManager
-							cookieData={parsedData}
-							referer={referer}
-						>
-							{children}
-						</ScrollManager>
-					</main>
-				</CookiesProvider>
+				<main className="flex flex-col items-center relative">
+					<nav className="sticky top-0 w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white">
+						<div className="w-full max-w-5xl flex justify-center items-center p-3 px-5 text-md md:text-lg font-semibold">
+							Formulir Persetujuan Pelanggan PT Bintang Toedjoe
+						</div>
+					</nav>
+					<ScrollManager referer={referer}>{children}</ScrollManager>
+				</main>
 			</body>
 		</html>
 	);

@@ -86,7 +86,7 @@ export const sendEmail = async (data: FormData) => {
 					body: `
 						<p>Terima kasih bapak/ibu atas konfirmasi terhadap Formulir Persetujuan Pelanggan.</p>
 						<p>Jika anda merasa tidak melakukan persetujuan tersebut bisa klik link dibawah ini.</p>
-						<a href="http://fe-dev-b7-customer-consent.apps.alpha.kalbe.co.id/object?email=${data.get(
+						<a href="https://cust-consent.bintang7.com/object?email=${data.get(
 							"email"
 						)}">Link pembatalan persetujuan</a>
 						<p>Terima kasih.</p>

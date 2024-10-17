@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
+// const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+const nonce = "jFdJouinWvtez3LI";
+const cspHeader = `
+        script-src 'self' 'unsafe-inline' ${
+			process.env.NODE_ENV === "production" ? "" : `'unsafe-eval'`
+		};
+        img-src 'self' blob: data:;
+    `;
 
 const nextConfig = {
 	reactStrictMode: false,
@@ -37,10 +45,10 @@ const nextConfig = {
 						key: "X-Frame-Options",
 						value: "SAMEORIGIN",
 					},
-					// {
-					// 	key: "Content-Security-Policy",
-					// 	value: cspHeader.replace(/\n/g, ""),
-					// },
+					{
+						key: "Content-Security-Policy",
+						value: cspHeader.replace(/\n/g, ""),
+					},
 				],
 			},
 		];

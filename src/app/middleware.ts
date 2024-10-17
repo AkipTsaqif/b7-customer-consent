@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-	const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+	// const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+	const nonce = "jFdJouinWvtez3LI";
 	const cspHeader = `
-        default-src 'self' '*.kalbe.co.id kalbe.co.id' '*.bintang7.com';
-        script-src 'self' 'http://fe-dev-b7-customer-consent.apps.alpha.kalbe.co.id' '*.kalbe.co.id' 'kalbe.co.id' '*.bintang7.com' 'nonce-${nonce}' 'strict-dynamic';
-        style-src 'self' 'nonce-${nonce}';
+        script-src 'self' 'unsafe-inline' ${
+			process.env.NODE_ENV === "production" ? "" : `'unsafe-eval'`
+		};
         img-src 'self' blob: data:;
-        font-src 'self';
-        object-src 'none';
-        base-uri 'self';
-        form-action 'self';
-        frame-ancestors 'none';
-        upgrade-insecure-requests;
     `;
 
 	const contentSecurityPolicyHeaderValue = cspHeader
