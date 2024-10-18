@@ -38,7 +38,10 @@ export default function RootLayout({
 				<main className="flex flex-col items-center relative">
 					<nav className="sticky top-0 w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white">
 						<div className="w-full max-w-5xl flex justify-center items-center p-3 px-5 text-md md:text-lg font-semibold">
-							Formulir Persetujuan Pelanggan PT Bintang Toedjoe
+							<span className="w-[20rem] sm:w-full sm:text-center">
+								Formulir Persetujuan Pelanggan PT Bintang
+								Toedjoe
+							</span>
 						</div>
 					</nav>
 					<ScrollManager referer={referer}>{children}</ScrollManager>

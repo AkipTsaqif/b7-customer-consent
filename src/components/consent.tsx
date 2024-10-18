@@ -25,7 +25,7 @@ const FormSchema = z.object({
 		})
 		.min(2),
 	email: z.string().email(),
-	phone: z.string(),
+	phone: z.string().min(6),
 	address: z.string(),
 	other_info: z.string(),
 	agreeTerms: z.boolean().refine((val) => val === true, {
@@ -156,8 +156,9 @@ const Consent = ({
 						name="phone"
 						render={({ field }) => (
 							<FormItem className="grid grid-cols-12 items-center gap-2">
-								<FormLabel className="col-span-3 lg:col-span-2 text-sm md:text-md">
+								<FormLabel className="col-span-3 lg:col-span-2 font-bold text-sm md:text-md">
 									Nomor HP:
+									<span className="text-red-600">*</span>
 								</FormLabel>
 								<FormControl>
 									<Input

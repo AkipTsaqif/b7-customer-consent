@@ -59,30 +59,32 @@ export async function POST(request: Request) {
 
 	try {
 		const jsonData = await request.json();
-
-		if (!jsonData.uid) {
-			return NextResponse.json(
-				{ error: "Missing 'uid' in JSON data." },
-				{ status: 400, headers }
-			);
-		}
+		const uid = "10000000-1000-4000-8000-100000000000".replace(
+			/[018]/g,
+			(c) =>
+				(
+					+c ^
+					(crypto.getRandomValues(new Uint8Array(1))[0] &
+						(15 >> (+c / 4)))
+				).toString(16)
+		);
 
 		const query = `
             INSERT INTO tbl_trx_json_identifier (uid, json_data) 
-            VALUES ('${jsonData.uid}', '${JSON.stringify(jsonData)}')
+            VALUES ('${uid}', '${JSON.stringify(jsonData)}')
             `;
 
 		const result = await ExecuteQuery(query);
 
 		if (result.rowsAffected && result.rowsAffected[0] > 0) {
 			return NextResponse.json(
-				{ message: "JSON data sent successfully" },
-				{ status: 201, headers }
+				{ message: "JSON data sent successfully", uid },
+				{ status: 201 }
 			);
 		} else {
 			return NextResponse.json(
 				{ error: "Failed to insert data." },
-				{ status: 500, headers }
+				{ status: 500 }
 			);
 		}
 	} catch (error) {

@@ -10,7 +10,7 @@ interface WholePageProps {
 
 const WholePage = ({ referer, setFormSubmitSuccess }: WholePageProps) => {
 	return (
-		<div className="w-[25rem] md:w-[40rem] lg:w-[50rem] ">
+		<div className="w-[20rem] sm:w-[30rem] md:w-[40rem] lg:w-[50rem] text-justify">
 			<div className="flex flex-col gap-1 md:gap-2 text-sm md:text-md">
 				<div className="flex flex-col gap-2 md:gap-3">
 					<p>Pelanggan yang terhormat,</p>
