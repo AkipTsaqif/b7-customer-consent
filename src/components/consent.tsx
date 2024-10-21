@@ -13,7 +13,6 @@ import { saveConsent, sendEmail } from "@/app/actions/sql";
 import { useSearchParams } from "next/navigation";
 
 interface ConsentProps {
-	isDisabled: boolean;
 	referer: string | null;
 	setFormSubmitSuccess: (value: boolean) => void | undefined;
 }
@@ -33,11 +32,7 @@ const FormSchema = z.object({
 	}),
 });
 
-const Consent = ({
-	isDisabled,
-	referer,
-	setFormSubmitSuccess,
-}: ConsentProps) => {
+const Consent = ({ referer, setFormSubmitSuccess }: ConsentProps) => {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -51,34 +46,47 @@ const Consent = ({
 		mode: "onChange",
 	});
 
+	const { setValue } = form;
+
 	const searchParams = useSearchParams();
 
 	const { isValid } = useFormState({ control: form.control });
 	const [isLoading, setIsLoading] = useState(false);
-	const [uniqueIdentifier, setUniqueIdentifier] = useState<string | null>(
-		null
-	);
+	const [isDisabled, setIsDisabled] = useState(true);
+	const [userDataJson, setUserDataJson] = useState<string | null>(null);
+
+	const fetchJsonData = async (uid: string) => {
+		try {
+			const response = await fetch(`/api/consent?uid=${uid}`);
+			const data = await response.json();
+
+			if (!data.error) {
+				setUserDataJson(data);
+				setValue("name", data.name);
+				setValue("email", data.email);
+				setValue("phone", data.phone);
+				setValue("address", data.address);
+			} else {
+				setIsDisabled(false);
+			}
+		} catch (error) {
+			console.error("ERROR", error);
+		}
+	};
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			const uid = new URLSearchParams(window.location.search).get("uid");
-			setUniqueIdentifier(uid);
+			if (uid) {
+				fetchJsonData(uid);
+			} else {
+				setIsDisabled(false);
+			}
 		}
 	}, []);
 
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
 		setIsLoading(true);
-		let user_data_json = "";
-
-		const fetchJsonData = async () => {
-			const response = await fetch(
-				`/api/consent?uid=${uniqueIdentifier}`
-			);
-			const data = await response.json();
-			user_data_json = data;
-		};
-
-		await fetchJsonData();
 
 		const formData = new FormData();
 		formData.append("name", data.name);
@@ -92,7 +100,7 @@ const Consent = ({
 		// 	formData.append("user_data_json", JSON.stringify(cookieData));
 		// else
 
-		formData.append("user_data_json", JSON.stringify(user_data_json) || "");
+		formData.append("user_data_json", JSON.stringify(userDataJson) || "");
 		formData.append(
 			"referer",
 			searchParams.get("referer") || referer || ""
@@ -100,6 +108,7 @@ const Consent = ({
 
 		const result = await saveConsent(formData);
 		await sendEmail(formData);
+
 		if (result.status === 201) {
 			form.reset();
 			setIsLoading(false);
@@ -182,7 +191,6 @@ const Consent = ({
 									<Input
 										{...field}
 										className="col-span-9 lg:col-span-10 disabled:bg-neutral-400 focus-visible:ring-green-600 focus-visible:ring-offset-0"
-										disabled={isDisabled}
 									/>
 								</FormControl>
 							</FormItem>
@@ -200,7 +208,6 @@ const Consent = ({
 									<Input
 										{...field}
 										className="col-span-9 lg:col-span-10 disabled:bg-neutral-400 focus-visible:ring-green-600 focus-visible:ring-offset-0"
-										disabled={isDisabled}
 									/>
 								</FormControl>
 							</FormItem>
@@ -216,7 +223,6 @@ const Consent = ({
 										<Checkbox
 											id="terms"
 											className="w-5 h-5"
-											disabled={isDisabled}
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
@@ -260,7 +266,6 @@ const Consent = ({
 										<Checkbox
 											id="agreeData"
 											className="w-5 h-5"
-											disabled={isDisabled}
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
@@ -280,7 +285,7 @@ const Consent = ({
 					<Button
 						type="submit"
 						className="mt-4 w-full bg-green-600 font-bold text-lg disabled:bg-neutral-400 disabled:cursor-not-allowed"
-						disabled={isDisabled || !isValid || isLoading}
+						disabled={!isValid || isLoading}
 					>
 						Submit
 					</Button>

@@ -17,7 +17,6 @@ const ScrollManager: React.FC<ScrollManagerProps> = ({
 	const [isFormSubmitSuccess, setFormSubmitSuccess] = useState(false);
 
 	const currentPath = usePathname();
-	console.log("Current path:", currentPath);
 
 	useEffect(() => {
 		console.log("Selamat datang di web customer consent Bintang Toedjoe");

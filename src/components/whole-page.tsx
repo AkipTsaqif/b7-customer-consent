@@ -1,5 +1,3 @@
-"use client";
-
 import Consent from "./consent";
 import { Separator } from "./ui/separator";
 
@@ -294,7 +292,6 @@ const WholePage = ({ referer, setFormSubmitSuccess }: WholePageProps) => {
 			</div>
 			<Separator className="my-4" />
 			<Consent
-				isDisabled={false}
 				referer={referer}
 				setFormSubmitSuccess={setFormSubmitSuccess}
 			/>

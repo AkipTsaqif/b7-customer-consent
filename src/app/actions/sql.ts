@@ -11,8 +11,13 @@ export const saveConsent = async (data: FormData) => {
 	const otherInfo = data.get("other_info") || null;
 	const agreeTerms = data.get("agreeTerms") ? 1 : 0;
 
-	const userData = data.get("user_data_json") || null;
+	const userData =
+		data.get("user_data_json") !== "null"
+			? data.get("user_data_json")
+			: null;
 	const referer = data.get("referer") || null;
+
+	console.log("USER DATA", userData);
 
 	try {
 		const query = `
@@ -58,6 +63,28 @@ export const updateConsent = async (email: string) => {
 		return {
 			status: 200,
 			message: "Consent updated successfully",
+			data: result,
+		};
+	} catch {
+		return {
+			status: 500,
+			message: "Internal server error",
+		};
+	}
+};
+
+export const removeTempConsent = async (uid: string) => {
+	try {
+		const query = `
+			DELETE FROM tbl_trx_json_identifier
+			WHERE uid = '${uid}'
+		`;
+
+		const result = await ExecuteQuery(query);
+		console.log("RESULT", result);
+		return {
+			status: 200,
+			message: "Temp consent removed successfully",
 			data: result,
 		};
 	} catch {

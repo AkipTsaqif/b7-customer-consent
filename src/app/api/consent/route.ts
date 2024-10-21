@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import ExecuteQuery from "@/lib/db";
+import { saveConsent, sendEmail } from "@/app/actions/sql";
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -27,14 +28,20 @@ export async function GET(request: Request) {
 		console.log(
 			"================================ NO JSON DATA IS CORRECT HERE =========================================="
 		);
-		return NextResponse.json({ error: "No data found" }, { status: 404 });
+		return NextResponse.json(
+			{ error: "UID tidak cocok dengan database!" },
+			{ status: 404 }
+		);
 	}
 
 	const rows = jsonData.recordsets[0];
 	console.log("ROWS:", rows);
 
 	if (!rows || !rows.length) {
-		return NextResponse.json({ error: "No data found" }, { status: 404 });
+		return NextResponse.json(
+			{ error: "UID tidak cocok dengan database!" },
+			{ status: 404 }
+		);
 	}
 
 	const jsonResponse = JSON.parse(rows[0].json_data);
@@ -58,7 +65,38 @@ export async function POST(request: Request) {
 	}
 
 	try {
+		const url = new URL(request.url);
+		const shouldRedirect = url.searchParams.get("redirectCCB7");
 		const jsonData = await request.json();
+		const referer = request.headers.get("referer");
+
+		if (shouldRedirect === "no") {
+			const formData = new FormData();
+			formData.append("name", jsonData.name);
+			formData.append("email", jsonData.email);
+			formData.append("phone", jsonData.phone);
+			formData.append("address", jsonData.address || "");
+			formData.append("other_info", jsonData.other_info || "");
+			formData.append("agreeTerms", "true");
+			formData.append("user_data_json", JSON.stringify(jsonData));
+			formData.append("referer", referer || "");
+
+			const result = await saveConsent(formData);
+			await sendEmail(formData);
+
+			if (result.status === 201) {
+				return NextResponse.json(
+					{ message: "JSON data sent successfully" },
+					{ status: 201 }
+				);
+			} else {
+				return NextResponse.json(
+					{ error: "Failed to insert data." },
+					{ status: 500 }
+				);
+			}
+		}
+
 		const uid = "10000000-1000-4000-8000-100000000000".replace(
 			/[018]/g,
 			(c) =>
