@@ -20,7 +20,7 @@ const pool = new Pool(config);
 
 export default async function ExecuteQuery(
 	query: string,
-	params?: any[]
+	params?: (string | number | null | undefined | FormDataEntryValue)[]
 ): Promise<QueryResult> {
 	try {
 		const result: PgQueryResult<Record<string, string>> = await pool.query(
