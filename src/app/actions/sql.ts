@@ -52,7 +52,7 @@ export const updateConsent = async (email: string) => {
 	try {
 		const query = `
 			UPDATE tbl_trx_consent
-			SET agree_terms = 0, objected = 1, objected_at = CURRENT_TIMESTAMP
+			SET agree_terms = false, objected = true, objected_at = CURRENT_TIMESTAMP
 			WHERE email = $1
 		`;
 
