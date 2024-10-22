@@ -1,6 +1,6 @@
 import { Pool, QueryResult as PgQueryResult } from "pg";
 
-const remote_gcp = "35.240.147.75";
+// const remote_gcp = "35.240.147.75";
 const local_gcp = "localhost";
 
 const config = {
