@@ -1,51 +1,38 @@
 import { NextResponse } from "next/server";
-import ExecuteQuery from "@/lib/db";
+import ExecuteQuery from "@/lib/db-pg";
 import { saveConsent, sendEmail } from "@/app/actions/sql";
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
-	console.log("searchParams:", searchParams);
-	const url = new URL(request.url);
-	console.log("Full URL:", url.toString());
 	const uniqueIdentifier = searchParams.get("uid");
 
-	const query = `SELECT json_data FROM tbl_trx_json_identifier WHERE uid = '${uniqueIdentifier}'`;
-	console.log("QUERY:", query);
+	const query = `SELECT json_data FROM tbl_trx_json_identifier WHERE uid = $1`;
+	const values = [uniqueIdentifier];
 
-	const jsonData = await ExecuteQuery(query);
+	const jsonData = await ExecuteQuery(query, values);
 
 	console.log("=============================");
-	console.log("JSON DATA RECORD SETS:", jsonData.recordsets);
-	console.log("JSON DATA RECORD SET:", jsonData.recordset);
-	console.log("JSON DATA ROWS AFFECTED:", jsonData.rowsAffected);
+	console.log("JSON DATA ROWS:", jsonData.rows);
 	console.log("=============================");
 
-	if (
-		!jsonData ||
-		!Array.isArray(jsonData.recordsets) ||
-		!jsonData.recordsets.length
-	) {
-		console.log(
-			"================================ NO JSON DATA IS CORRECT HERE =========================================="
-		);
+	if (!jsonData || !Array.isArray(jsonData.rows) || !jsonData.rows.length) {
+		console.log("========== NO JSON DATA FOUND =============");
 		return NextResponse.json(
 			{ error: "UID tidak cocok dengan database!" },
 			{ status: 404 }
 		);
 	}
 
-	const rows = jsonData.recordsets[0];
-	console.log("ROWS:", rows);
+	const row = jsonData.rows[0];
 
-	if (!rows || !rows.length) {
+	if (!row || !row.json_data) {
 		return NextResponse.json(
 			{ error: "UID tidak cocok dengan database!" },
 			{ status: 404 }
 		);
 	}
 
-	const jsonResponse = JSON.parse(rows[0].json_data);
-	console.log("JSON RESPONSE:", jsonResponse);
+	const jsonResponse = JSON.parse(row.json_data);
 	return NextResponse.json(jsonResponse);
 }
 
@@ -59,7 +46,7 @@ export async function POST(request: Request) {
 
 	if (request.method === "OPTIONS") {
 		return new Response(null, {
-			status: 201, // No Content
+			status: 201,
 			headers,
 		});
 	}
@@ -80,6 +67,8 @@ export async function POST(request: Request) {
 			formData.append("agreeTerms", "true");
 			formData.append("user_data_json", JSON.stringify(jsonData));
 			formData.append("referer", referer || "");
+
+			console.log("FORM DATA", formData);
 
 			const result = await saveConsent(formData);
 			await sendEmail(formData);
@@ -108,13 +97,15 @@ export async function POST(request: Request) {
 		);
 
 		const query = `
-            INSERT INTO tbl_trx_json_identifier (uid, json_data) 
-            VALUES ('${uid}', '${JSON.stringify(jsonData)}')
-            `;
+			INSERT INTO tbl_trx_json_identifier (uid, json_data) 
+			VALUES ($1, $2)
+		`;
 
-		const result = await ExecuteQuery(query);
+		const values = [uid, JSON.stringify(jsonData)];
 
-		if (result.rowsAffected && result.rowsAffected[0] > 0) {
+		const result = await ExecuteQuery(query, values);
+
+		if (result.rowCount && result.rowCount > 0) {
 			return NextResponse.json(
 				{ message: "JSON data sent successfully", uid },
 				{ status: 201 }

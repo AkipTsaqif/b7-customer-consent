@@ -1,9 +1,8 @@
 "use server";
 
-import ExecuteQuery from "@/lib/db";
+import ExecuteQuery from "@/lib/db-pg";
 
 export const saveConsent = async (data: FormData) => {
-	console.log("FORM DATA", data);
 	const name = data.get("name");
 	const email = data.get("email");
 	const phone = data.get("phone") || null;
@@ -17,24 +16,24 @@ export const saveConsent = async (data: FormData) => {
 			: null;
 	const referer = data.get("referer") || null;
 
-	console.log("USER DATA", userData);
-
 	try {
 		const query = `
-			INSERT INTO tbl_trx_consent (name, email, phone, address, other_info, user_data_json, referer, agreeTerms)
-			VALUES (
-				${name ? `'${name}'` : "NULL"}, 
-				${email ? `'${email}'` : "NULL"}, 
-				${phone ? `'${phone}'` : "NULL"}, 
-				${address ? `'${address}'` : "NULL"}, 
-				${otherInfo ? `'${otherInfo}'` : "NULL"}, 
-				${userData ? `'${userData}'` : "NULL"}, 
-				${referer ? `'${referer}'` : "NULL"}, 
-				${agreeTerms}
-			)
+			INSERT INTO tbl_trx_consent (name, email, phone, address, other_info, user_data_json, referer, agree_terms)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		`;
 
-		const result = await ExecuteQuery(query);
+		const values = [
+			name || null,
+			email || null,
+			phone || null,
+			address || null,
+			otherInfo || null,
+			userData || null,
+			referer || null,
+			agreeTerms,
+		];
+
+		const result = await ExecuteQuery(query, values);
 		console.log("RESULT", result);
 		return {
 			status: 201,
@@ -53,12 +52,15 @@ export const updateConsent = async (email: string) => {
 	try {
 		const query = `
 			UPDATE tbl_trx_consent
-			SET agreeTerms = 0, objected = 1, objected_at = getdate()
-			WHERE email = '${email}'
+			SET agree_terms = 0, objected = 1, objected_at = CURRENT_TIMESTAMP
+			WHERE email = $1
 		`;
+
+		const values = [email];
+
 		console.log("QUERY", query);
 
-		const result = await ExecuteQuery(query);
+		const result = await ExecuteQuery(query, values);
 		console.log("RESULT", result);
 		return {
 			status: 200,
