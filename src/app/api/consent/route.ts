@@ -38,6 +38,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	console.log("MAIN POST REQUEST");
+	console.log("REQUEST", request);
+	console.log("=====================================");
 	const headers = new Headers({
 		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Allow-Headers": "Content-Type",
@@ -46,6 +49,8 @@ export async function POST(request: Request) {
 	});
 
 	if (request.method === "OPTIONS") {
+		console.log("OPTIONS REQUEST");
+		console.log("HEADERS", headers);
 		return new Response(null, {
 			status: 204,
 			headers,
