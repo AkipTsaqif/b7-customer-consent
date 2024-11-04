@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { generateToken } from "@/lib/jwt";
 import { randomizeString } from "@/lib/utils";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
 	// const { clientId, clientSecret } = await req.json();
 	const client = "b7-cust-consent-client";
 
