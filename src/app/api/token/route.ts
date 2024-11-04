@@ -3,7 +3,7 @@ import { generateToken } from "@/lib/jwt";
 import { randomizeString } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
-	const { clientId, clientSecret } = await req.json();
+	// const { clientId, clientSecret } = await req.json();
 	const client = "b7-cust-consent-client";
 
 	// if (
