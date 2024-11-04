@@ -45,6 +45,13 @@ export async function POST(request: Request) {
 		"Content-Type": "application/json",
 	});
 
+	if (request.method === "OPTIONS") {
+		return new Response(null, {
+			status: 204,
+			headers,
+		});
+	}
+
 	const authHeader = request.headers.get("authorization");
 	const token = authHeader && authHeader.split(" ")[1];
 
@@ -61,13 +68,6 @@ export async function POST(request: Request) {
 			{ message: "Token is not valid" },
 			{ status: 403 }
 		);
-	}
-
-	if (request.method === "OPTIONS") {
-		return new Response(null, {
-			status: 201,
-			headers,
-		});
 	}
 
 	try {
