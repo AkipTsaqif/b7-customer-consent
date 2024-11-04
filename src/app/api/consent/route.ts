@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import ExecuteQuery from "@/lib/db-pg";
 import { saveConsent, sendEmail } from "@/app/actions/sql";
+import { verifyToken } from "@/lib/jwt";
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -43,6 +44,24 @@ export async function POST(request: Request) {
 		"Access-Control-Allow-Methods": "POST, OPTIONS",
 		"Content-Type": "application/json",
 	});
+
+	const authHeader = request.headers.get("authorization");
+	const token = authHeader && authHeader.split(" ")[1];
+
+	if (!token) {
+		return NextResponse.json(
+			{ message: "Token not provided" },
+			{ status: 401 }
+		);
+	}
+
+	const access = verifyToken(token);
+	if (!access) {
+		return NextResponse.json(
+			{ message: "Token is not valid" },
+			{ status: 403 }
+		);
+	}
 
 	if (request.method === "OPTIONS") {
 		return new Response(null, {
