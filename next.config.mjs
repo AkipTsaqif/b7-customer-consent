@@ -1,12 +1,5 @@
 /** @type {import('next').NextConfig} */
 // const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-const nonce = "jFdJouinWvtez3LI";
-const cspHeader = `
-        script-src 'self' 'unsafe-inline' ${
-			process.env.NODE_ENV === "production" ? "" : `'unsafe-eval'`
-		};
-        img-src 'self' blob: data:;
-    `;
 
 import nextSafe from "next-safe";
 const isDev = process.env.NODE_ENV !== "production";
@@ -21,7 +14,6 @@ const nextConfig = {
 				source: "/(.*)",
 				headers: [
 					...securityHeaders,
-					{ key: "Access-Control-Allow-Origin", value: "*" },
 					{
 						key: "Access-Control-Allow-Methods",
 						value: "GET,POST,PUT,DELETE,OPTIONS",

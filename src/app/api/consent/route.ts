@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 	console.log("REQUEST", request);
 	console.log("=====================================");
 	const headers = new Headers({
-		"Access-Control-Allow-Origin": "*",
+		"Access-Control-Allow-Origin": "https://www.bintang7.com",
 		"Access-Control-Allow-Headers": "Content-Type",
 		"Access-Control-Allow-Methods": "POST, OPTIONS",
 		"Content-Type": "application/json",

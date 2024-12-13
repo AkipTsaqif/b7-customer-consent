@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
 	// const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -34,3 +35,18 @@ export function middleware(request: NextRequest) {
 
 	return response;
 }
+
+// export function middleware(request: NextRequest) {
+// 	const maintenanceMode = process.env.MAINTENANCE_MODE === "true";
+// 	const path = request.nextUrl.pathname;
+
+// 	console.log("Maintenance Mode:", process.env.MAINTENANCE_MODE);
+
+// 	if (maintenanceMode && !path.startsWith("/api")) {
+// 		return new NextResponse("Front-end is disabled for maintenance.", {
+// 			status: 503,
+// 		});
+// 	}
+
+// 	return NextResponse.next();
+// }
