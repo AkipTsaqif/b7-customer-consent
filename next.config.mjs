@@ -19,6 +19,10 @@ const nextConfig = {
 						value: "GET,POST,PUT,DELETE,OPTIONS",
 					},
 					{
+						key: "Access-Control-Allow-Origin",
+						value: "bintang7.com",
+					},
+					{
 						key: "Access-Control-Allow-Headers",
 						value: "Content-Type, Authorization",
 					},
