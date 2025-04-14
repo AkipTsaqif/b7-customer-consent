@@ -1,12 +1,12 @@
 import { Pool, QueryResult as PgQueryResult } from "pg";
 
-// const remote_gcp = "35.240.147.75";
-const local_gcp = "localhost";
+const remote_gcp = "35.240.147.75";
+// const local_gcp = "localhost";
 
 const config = {
 	user: "postgres",
 	password: "pg_sqlb7",
-	host: local_gcp,
+	host: remote_gcp,
 	database: "customer_consent",
 	port: 5432,
 };

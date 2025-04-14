@@ -25,6 +25,7 @@ export async function GET(request: Request) {
 	}
 
 	const row = jsonData.rows[0];
+	console.log("ROW JSON DATA:", row.json_data);
 
 	if (!row || !row.json_data) {
 		return NextResponse.json(
@@ -33,7 +34,20 @@ export async function GET(request: Request) {
 		);
 	}
 
-	const jsonResponse = JSON.parse(row.json_data);
+	let jsonResponse;
+	if (typeof row.json_data === "string") {
+		try {
+			jsonResponse = JSON.parse(row.json_data);
+		} catch (error) {
+			console.error("Error parsing JSON data:", error);
+			return NextResponse.json(
+				{ error: "Invalid JSON data in database!" },
+				{ status: 500 }
+			);
+		}
+	} else {
+		jsonResponse = row.json_data;
+	}
 	return NextResponse.json(jsonResponse);
 }
 
