@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import ExecuteQuery from "@/lib/db-pg";
 import { saveConsent, sendEmail } from "@/app/actions/sql";
 import { verifyToken } from "@/lib/jwt";
+import { corsHeaders } from "@/lib/cors";
+
+export async function OPTIONS() {
+	return new NextResponse(null, {
+		status: 204,
+		headers: corsHeaders,
+	});
+}
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -48,7 +56,10 @@ export async function GET(request: Request) {
 	} else {
 		jsonResponse = row.json_data;
 	}
-	return NextResponse.json(jsonResponse);
+	return new NextResponse(JSON.stringify({ jsonResponse }), {
+		status: 200,
+		headers: corsHeaders,
+	});
 }
 
 export async function POST(request: Request) {
@@ -56,7 +67,7 @@ export async function POST(request: Request) {
 	console.log("REQUEST", request);
 	console.log("=====================================");
 	const headers = new Headers({
-		"Access-Control-Allow-Origin": "https://www.bintang7.com",
+		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Allow-Headers": "Content-Type",
 		"Access-Control-Allow-Methods": "POST, OPTIONS",
 		"Content-Type": "application/json",
@@ -75,17 +86,17 @@ export async function POST(request: Request) {
 	const token = authHeader && authHeader.split(" ")[1];
 
 	if (!token) {
-		return NextResponse.json(
-			{ message: "Token not provided" },
-			{ status: 401 }
+		return new NextResponse(
+			JSON.stringify({ message: "Token not provided" }),
+			{ status: 401, headers: corsHeaders }
 		);
 	}
 
 	const access = verifyToken(token);
 	if (!access) {
-		return NextResponse.json(
-			{ message: "Token is not valid" },
-			{ status: 403 }
+		return new NextResponse(
+			JSON.stringify({ message: "Token is not valid" }),
+			{ status: 403, headers: corsHeaders }
 		);
 	}
 
@@ -113,13 +124,13 @@ export async function POST(request: Request) {
 
 			if (result.status === 201) {
 				return NextResponse.json(
-					{ message: "JSON data sent successfully" },
-					{ status: 201 }
+					JSON.stringify({ message: "Data sent successfully" }),
+					{ status: 201, headers: corsHeaders }
 				);
 			} else {
 				return NextResponse.json(
-					{ error: "Failed to insert data." },
-					{ status: 500 }
+					JSON.stringify({ error: "Failed to send the data" }),
+					{ status: 500, headers: corsHeaders }
 				);
 			}
 		}
@@ -144,21 +155,21 @@ export async function POST(request: Request) {
 		const result = await ExecuteQuery(query, values);
 
 		if (result.rowCount && result.rowCount > 0) {
-			return NextResponse.json(
-				{ message: "JSON data sent successfully", uid },
-				{ status: 201 }
+			return new NextResponse(
+				JSON.stringify({ message: "JSON data sent successfully", uid }),
+				{ status: 201, headers: corsHeaders }
 			);
 		} else {
-			return NextResponse.json(
-				{ error: "Failed to insert data." },
-				{ status: 500 }
+			return new NextResponse(
+				JSON.stringify({ error: "Failed to send the data" }),
+				{ status: 500, headers: corsHeaders }
 			);
 		}
 	} catch (error) {
 		console.error("Error processing request:", error);
-		return NextResponse.json(
-			{ error: "Internal server error." },
-			{ status: 500, headers }
+		return new NextResponse(
+			JSON.stringify({ error: "Internal server error." }),
+			{ status: 500, headers: corsHeaders }
 		);
 	}
 }
