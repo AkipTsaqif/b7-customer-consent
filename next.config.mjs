@@ -20,7 +20,7 @@ const nextConfig = {
 					},
 					{
 						key: "Access-Control-Allow-Origin",
-						value: "bintang7.com",
+						value: "*",
 					},
 					{
 						key: "Access-Control-Allow-Headers",
